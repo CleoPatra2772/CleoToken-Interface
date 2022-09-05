@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 // import getWeb3 from '../../getWeb3';
+import './info.styles.css';
 
 import {Vendor_ABI, Vendor_contractAddress } from '../contracts/ABI_Vendor';
 import { ABI, contractAddress } from "../contracts/ABI_ERC20";
@@ -216,7 +217,7 @@ export const Info = () => {
         <div className="info-container">
         <div className = 'title'>
             <h1>Welcome to CLEO Token</h1>
-            <button onClick={connectWalletHandler}>Connect to your wallet</button>
+            <button className='connect-wallet-btn'onClick={connectWalletHandler}>Connect to your wallet</button>
         </div>
         <div className='vendor-info'>
             <h2>BlockChain Type: <span>{netType}</span></h2>
@@ -239,10 +240,16 @@ export const Info = () => {
 
         <div className='button-container'>
         <button className="btn" onClick = {() => {window.location.reload()}}>Refresh</button>
-        
+
         <input className="inputNum" type='number' name='amountBuy' min='100' id='qtyBuy' step='100'
         value={amountBuy} onChange= {((e) => setAmountbuy(e.target.value))}></input>
         <button className="btn" onClick = {() => buyToken(amountBuy)}> Buy Token</button>
+
+        <input className="inputNum" type='number' name='amountSell' min='100' id='qtySell' step='100'
+        value={amountSell} onChange ={((e) => setAmountSell(e.target.value))}></input>
+        <button className='btn' onClick = {() => sellToken(amountSell)}> Sell Token</button>
+
+        <button className='btn' disabled={!owner} onClick={() => withdraw()} >Withdraw</button>
 
 
 
