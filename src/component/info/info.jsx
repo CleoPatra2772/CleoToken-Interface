@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import getWeb3 from '../../getWeb3';
+// import getWeb3 from '../../getWeb3';
 
 import {Vendor_ABI, Vendor_contractAddress } from '../contracts/ABI_Vendor';
 import { ABI, contractAddress } from "../contracts/ABI_ERC20";
@@ -19,24 +19,65 @@ export const Info = () => {
     const [contractBalance, setContractBalance] = useState('');
     const [contractTokenBalance, setContractTokenBalance] = useState('');
     const [owner, setOwner] = useState(false);
+    
+   let web3
+
+    const connectWalletHandler = async () => {
+        let web3
+       if(typeof window !== 'undefined' && typeof window.ethereum !== 'undefined'){
+        try { 
+            await window.ethereum.request({method: "eth_requestAccounts"})
+            web3 = new Web3(window.ethereum)
+        }catch(err){
+            console.log(err)
+        }
+       }else{
+        console('Please install MetaMask')
+       }
+
+    }
 
     const init = async() => {
-        const web3 = await getWeb3();
+        let web3 = null;
+
+        try{
+        if(window.ethereum != null){
+            web3 = new Web3(window.ethereum)
+            console.log('WEB3', web3)
+            await window.ethereum.enable()
+        }else{
+            alert('Please intall Metamask Wallet')
+            return;
+        }
+
+    
         const netId = await web3.eth.net.getId();
         setNetworkId(netId);
         const netType = await web3.eth.net.getNetworkType();
         setNetType (netType);
-        const accounts = await web3.eth.net.getAccounts();
+        const accounts = await web3.eth.getAccounts();
         setActiveAccount(accounts[0]);
-        const acBalance = await web3.eth.net.getBalance(accounts[0]);
+        const acBalance = await web3.eth.getBalance(accounts[0]);
         setAccountBalance(acBalance / 1e18);
+    }catch(err){
+        console.log('Err message: ', err)
+    }
 
     }
 
     const contractInfo = async () => {
-        const web3 = await getWeb3();
+        let web3 = null;
 
-        let contractBal = await web3.eth.net.getBalance(Vendor_contractAddress);
+        try{
+        if(window.ethereum != null){
+            web3 = new Web3(window.ethereum)
+            console.log('WEB3', web3)
+            await window.ethereum.enable()
+        }else{
+            alert('Please intall Metamask Wallet')
+            return;
+        }
+        let contractBal = await web3.eth.getBalance(Vendor_contractAddress);
         contractBal = contractBal / 1e18;
         setContractBalance(contractBal);
 
@@ -61,7 +102,11 @@ export const Info = () => {
 
         const contractTokenBal = await tc2.methods.balanceOf(Vendor_contractAddress).call();
         setContractTokenBalance(contractTokenBal);
+        }catch(err){
+            console.log(err)
+        }
     }
+
 
     const buyToken = async ( buyQty ) => {
 
@@ -171,14 +216,30 @@ export const Info = () => {
         <div className="info-container">
         <div className = 'title'>
             <h1>Welcome to CLEO Token</h1>
+            <button onClick={connectWalletHandler}>Connect to your wallet</button>
         </div>
         <div className='vendor-info'>
-            <h2>BlockChain Type: {netType}</h2>
+            <h2>BlockChain Type: <span>{netType}</span></h2>
+            <h2>Net ID: <span>{netId}</span></h2>
+        <div className='vendor-details'>
+            <p>Contract Address: <span>{contractAddress}</span></p>
+            <p>Owner of Contract: <span>{contractOwner}</span></p>
+            <p>Contract Balance: <span>{contractBalance}</span> Ether</p>
+            <p>Contract CLC Token: <span>{contractTokenBalance}</span></p>
+        </div>
+        </div>
+        <hr></hr>
+        <div className="user-account-info">
+            <p>Your Account: <span>{activeAccount}</span></p>
+            <p>Value Balance: <span>{accountBalance}</span></p>
+            <p>CLC Token Balance: <span>{tokenBalance}</span></p>
+            <p>Price: 1 Ether = 100 CLC Tokens</p>
         </div>
 
 
         <div className='button-container'>
         <button className="btn" onClick = {() => {window.location.reload()}}>Refresh</button>
+        
         <input className="inputNum" type='number' name='amountBuy' min='100' id='qtyBuy' step='100'
         value={amountBuy} onChange= {((e) => setAmountbuy(e.target.value))}></input>
         <button className="btn" onClick = {() => buyToken(amountBuy)}> Buy Token</button>

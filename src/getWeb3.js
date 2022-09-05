@@ -10,7 +10,7 @@ const getWeb3 = () =>{
                 const web3 = new Web3(window.ethereum);
                 try{
                     //request account access if needed
-                    await window.ethereum.enable();
+                    await window.eth_requestAccounts();
                     //Accounts now exposed
                     console.log('Window ethereum enable', web3);
                     resolve(web3);
